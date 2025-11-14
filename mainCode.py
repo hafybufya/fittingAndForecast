@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy as np
+from datetime import date
 
 csv_in_use = "children-born-per-woman.csv"
 
@@ -41,19 +43,25 @@ spain_fertility_df = get_spanish_fertility()
 
 # fertility_graph = plot_fertility_women_graph()
 
+max_year = 2015
+mask = spain_fertility_df["Year"] <= max_year
+
+x_poly = spain_fertility_df["Year"]
+y_poly = spain_fertility_df["Fertility rate (period), historical"]
 
 
-x = spain_fertility_df["Year"]
-y = spain_fertility_df["Fertility rate (period), historical"]
+x_df = spain_fertility_df.loc[mask, "Year"]
+y_df = spain_fertility_df.loc[mask, "Fertility rate (period), historical"]
+
 
 # Perform linear fit
-coefficients = np.polyfit(x, y, 10)
+coefficients = np.polyfit(x_poly, y_poly, 10)
 print("Linear Fit Coefficients:", coefficients)
 
 # Create polynomial function
 p = np.poly1d(coefficients)
 
-plt.scatter(x, y, label='Data Points')
-plt.plot(x, p(x), label='Linear Fit', color='red')
+plt.scatter(x_df, y_df, label='Data Points')
+plt.plot(x_poly, p(x_poly), label='Linear Fit', color='red')
 plt.legend()
 plt.show()

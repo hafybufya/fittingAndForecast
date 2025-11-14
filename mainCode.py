@@ -1,7 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import datetime
 
 csv_in_use = "children-born-per-woman.csv"
 

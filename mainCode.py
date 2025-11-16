@@ -34,41 +34,62 @@ def get_spanish_fertility():
 spain_fertility_df = get_spanish_fertility()
 
 
-max_year = 2015
-mask = spain_fertility_df["Year"] <= max_year
+def plot_poly_graph():
 
-x_poly = spain_fertility_df["Year"]
-y_poly = spain_fertility_df["Fertility rate (period), historical"]
-
+    x = spain_fertility_df["Year"]
+    y = spain_fertility_df["Fertility rate (period), historical"]
 
 
-x_df = spain_fertility_df.loc[mask, "Year"]
-y_df = spain_fertility_df.loc[mask, "Fertility rate (period), historical"]
+    # Perform linear fit
+    coefficients = np.polyfit(x, y, deg=10, )
+  
+
+    # Create polynomial function
+    p = np.poly1d(coefficients)
+
+    plt.scatter(x, y, label='Data Points')
+    plt.plot(x, p(x), label='Linear Fit', color='red')
+    plt.legend()
+    plt.show()
 
 
 
-# Perform linear fit
-coefficients = np.polyfit(x_poly, y_poly, deg=10, )
-print("Linear Fit Coefficients:", coefficients)
+x = spain_fertility_df["Year"]
+y = spain_fertility_df["Fertility rate (period), historical"]
 
-# Create polynomial function
-p = np.poly1d(coefficients)
+sigma = 0.05
 
-plt.scatter(x_df, y_df, label='Data Points')
-plt.plot(x_poly, p(x_poly), label='Linear Fit', color='red')
-plt.legend()
-plt.errorbar(x_poly, y_poly, yerr=0.05, fmt='o', capsize=4, label="Data with error bars")
+degrees = [1,2,3,4,5,6,7,8,9,10]
+
+chi2_list = []
+
+chi2_reduced_list = []
+
+for d in degrees:
+    # Perform linear fit
+    coefficients = np.polyfit(x, y, deg = d )
+
+    # Create polynomial function
+    p = np.poly1d(coefficients)
+    y_pred = p(x)
+    resid = y - p(x)
+    sigma = 0.05*y
+
+    chi2 = np.sum(((y - y_pred) / sigma)**2)
+
+    dof = len(x) - (d + 1)
+
+    chi2_reduced = chi2/dof
+
+    chi2_list.append(chi2)
+    chi2_reduced_list.append(chi2_reduced)
 
 
-# plt.show()
+plt.plot(degrees, chi2_reduced_list, marker="o")
+plt.xlabel("Polynomial order (n)")
+plt.ylabel("Weighted x**2 per degrees of freedom")
+plt.title("Model comparison by polynomial order ")
+plt.grid(True)
+plt.show()
 
-#FIGURE 3
-sigma = 0.05 * y_poly
 
-
-y_pred = p(x_poly)
-plt.plot(x_poly, p(x_poly))
-
-#chi Squared calculation
-chi_squared = ((y_poly-y_pred)**2)/(sigma**2)
-print(chi_squared)

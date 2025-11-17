@@ -36,11 +36,10 @@ def read_fertility():
     return fertility_df
 
 # Calls function so to be used in spanish_fertility()
-
 fertility_df = read_fertility()
 
 
-#maybe pass top function into this func???
+
 def get_spanish_fertility():
     """
 
@@ -63,15 +62,35 @@ def get_spanish_fertility():
 
     return spain_fertility_df
 
+# Calls function so to be used in scatter plots
 spain_fertility_df = get_spanish_fertility()
 
 
 def plot_prediction_graph(x, y, degree):
+    """
+
+    Creates a plot containing both historical data sub-sampled all but the 
+    past 10 years and polynomial prediction 10 years into the future
+
+    Notes:
+    -> x, y and degree passed into the function
+    -> Convert x and y to numpy arrays so mask can be applied
+    -> Mask applied to hide the last ten years from the numpy arrays
+    -> Polynonimal fit calcualtion preformed 
+    -> Both historial data and polynomial fit placed on the same chart to 
+       allow comparison and see if fit is good
+
+    Returns:
+    matplotlib scatter graph -> historical data and polynomial fit on the same chart
+
+    """
+
     # Convert to numpy arrays
     x = np.array(x)
     y = np.array(y)
 
 
+    #mask applied to subsample all but the last ten years of data
     cutoff_year = x.max() - 10
 
     mask_sample = x <= cutoff_year
@@ -79,36 +98,72 @@ def plot_prediction_graph(x, y, degree):
     y_sample = y[mask_sample]
 
 
-    # Perform linear fit
+    # Perform polynomial fit
     coefficients = np.polyfit(x, y, degree )
   
 
     # Create polynomial function
     p = np.poly1d(coefficients)
 
-    plt.scatter(x_sample, y_sample, label='Historial Date')
-    plt.plot(x, p(x), label='Polynomial order 6', color='red')
+    plt.scatter(x_sample, y_sample, label='Historial Data')
+    plt.plot(x, p(x), label=f'Polynomial order {degree}', color='red')
     plt.legend()
     plt.show()
     
 
 def plot_full_graph(x, y, degree ):
+    """
 
-    # Perform linear fit
-    coefficients = np.polyfit(x, y, degree )
+    Creates a plot containing both historical and polynomial data over all years in the dataset
+
+    Notes:
+    -> x, y and degree passed into the function
+    -> Polynonimal fit calcualtion preformed 
+    -> Both historial data and polynomial fit placed on the same chart to 
+       allow comparison and see if fit is good
+
+    Returns:
+    matplotlib scatter graph -> historical data and polynomial fit on the same chart. 
+                                This chart can be compared with plot_prediction_graph
+                                to see how good fit is
+
+    """
+
+    # Perform polynomial fit
+    coefficients = np.polyfit(x, y, degree)
   
     # Create polynomial function
     p = np.poly1d(coefficients)
 
-    plt.scatter(x, y, label='Data Points')
-    plt.plot(x, p(x), label='Linear Fit', color='red')
+    plt.scatter(x, y, label='Historial Data')
+    plt.plot(x, p(x), label=f'Polynomial order {degree}', color='red')
     plt.legend()
     plt.show()
 
 
 def polynomial_best_fit(x , y, sigma):
+    """
 
+    Creates model comparison by polynomial order graph comparing polynomial order and reduced chisquared
+
+    Notes:
+    -> x, y and sigma passed into the function
+    -> Create a list for degrees, chi2_list, and chi2_reduced_list 
+    -> Use a for loop to create linear fit and calulate chi_squared, degrees of freedom  and reduced chisquared
+       -> chi squared = np.sum(((y - y_pred) / sigma)**2)
+       -> degrees of freedom = len(x) - (degrees + 1)
+       -> chi squared reduced =  chi_squared / degrees of freedom
+
+    Returns:
+    matplotlib scatter graph -> historical data and polynomial fit on the same chart. 
+                                This chart can be compared with plot_prediction_graph
+                                to see how good fit is
+
+    """
    
+   #lists used in for loop
+
+   #for loop to incremeent degrees from 1 to 10 by increments of 0.5
     degrees = [x for x in np.arange(1, 10.5, 0.5)]
 
     chi2_list = []
@@ -142,9 +197,10 @@ def polynomial_best_fit(x , y, sigma):
     plt.show()
 
 
-
+#passed into functions above
 x = spain_fertility_df[x_axis]
 y = spain_fertility_df[y_axis]
+
 
 
 

@@ -1,5 +1,6 @@
-
-# Importing functions used in the program
+# ---------------------------------------------------------------------
+# IMPORTED FUNCTIONS USED IN PROGRAM
+# ---------------------------------------------------------------------
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -24,10 +25,9 @@ def read_fertility():
 
     Loads the fertility dataset definied in 'csv_in_use'
 
-    Notes:
-    -> Year column is not parsed as a date to allow for scatterfit graphs
+    Returns
+    -------
 
-    Returns:
     pandas Dataframe -> converts csv to df containing fertility data
 
     """
@@ -46,11 +46,9 @@ def get_spanish_fertility():
 
     Filter the fertility dataset to include only Spanish data
 
-    Notes:
-    -> Apply a mask to select rows in 'Entity' == 'Spain'
-    -> Extract the year as an integer for creation of plots
+    Returns
+    -------
 
-    Returns:
     pandas Dataframe -> Filtered dataframe containg only Spanish fertility data
                          with the 'Year' column as integers.
 
@@ -70,21 +68,25 @@ spain_fertility_df = get_spanish_fertility()
 def plot_prediction_graph(x, y, degree):
     """
 
-    Creates a plot containing both historical data sub-sampled all but the 
-    past 10 years and polynomial prediction 10 years into the future
+    Creates a plot containing both historical data sub-sampled all but the past 10 years and polynomial function 
 
-    Notes:
-    -> x, y and degree passed into the function
-    -> Convert x and y to numpy arrays so mask can be applied
-    -> Mask applied to hide the last ten years from the numpy arrays
-    -> Polynonimal fit calcualtion preformed 
-    -> Both historial data and polynomial fit placed on the same chart to 
-       allow comparison and see if fit is good
+    
+    Parameters
+    ----------
 
-    Returns:
-    matplotlib scatter graph -> historical data and polynomial fit on the same chart
+    x :      Year from df, array
+    y :      Fertility rate from df, array
+    degree : Passed into function, integer
+
+    
+    Returns
+    -------
+
+    matplotlib line and scatter graph and -> historical data and polynomial plotted on the same chart. 
+                                
 
     """
+
 
     # Convert to numpy arrays
     x = np.array(x)
@@ -116,20 +118,25 @@ def plot_prediction_graph(x, y, degree):
     
 
 def plot_full_graph(x, y, degree ):
+
     """
 
     Creates a plot containing both historical and polynomial data over all years in the dataset
 
-    Notes:
-    -> x, y and degree passed into the function
-    -> Polynonimal fit calcualtion preformed 
-    -> Both historial data and polynomial fit placed on the same chart to 
-       allow comparison and see if fit is good
 
-    Returns:
-    matplotlib scatter graph -> historical data and polynomial fit on the same chart. 
-                                This chart can be compared with plot_prediction_graph
-                                to see how good fit is
+    Parameters
+    ----------
+
+    x :      Year from df, array
+    y :      Fertility rate from df, array
+    degree : Passed into function, integer
+
+
+    Returns
+    -------
+
+    matplotlib line and scatter graph -> historical data and polynomial plotted on the same chart. 
+                                
 
     """
 
@@ -151,27 +158,38 @@ def plot_full_graph(x, y, degree ):
 def polynomial_best_fit(x , y, sigma):
     """
 
-    Creates model comparison by polynomial order graph comparing polynomial order and reduced chisquared
+    Plots reduced chi-squared values for polynomial fits of different degrees of freedom
 
-    Notes:
-    -> x, y and sigma passed into the function
-    -> Create a list for degrees, chi2_list, and chi2_reduced_list 
-    -> Use a for loop to create linear fit and calulate chi_squared, degrees of freedom  and reduced chisquared
-       -> chi squared = np.sum(((y - y_pred) / sigma)**2)
-       -> degrees of freedom = len(x) - (degrees + 1)
-       -> chi squared reduced =  chi_squared / degrees of freedom
+    Parameters
+    ----------
+
+    x :     Year from df, array
+    y :     Fertility rate from df, array
+    sigma : Represent uncertaincy of the data points and used to weight them, float
+
+    Calculations
+    ------------
+
+    Calculate chi-squared 
+        - chi² = Σ[(y - y_pred) / sigma]²   
+    Calculate degrees of freedom
+        - dof = len(x) - (d + 1)
+    Calculate reduced chisquared
+        - chi²_red = chi² / dof
 
     Returns:
-    matplotlib scatter graph -> historical data and polynomial fit on the same chart. 
-                                This chart can be compared with plot_prediction_graph
-                                to see how good fit is
+    matplotlib line graph -> plots degree vs reduced chi-squared on the same chart. 
+                                Aids with showing which polynomial is the best fit for historical data.
 
     """
    
-   #lists used in for loop
+# ---------------------------------------------------------------------
+# Lists used in loops
+#  -> lists used to create graphs 
+# ---------------------------------------------------------------------
 
-   #for loop to incremeent degrees from 1 to 10 by increments of 0.5
-    degrees = [x for x in np.arange(1, 10.5, 0.5)]
+      #for loop to incremeent degrees from 1 to 10 by increments of 0.5
+    degrees = [x for x in np.arange(1, 10.5, 0.5)] 
 
     chi2_list = []
 
@@ -203,6 +221,81 @@ def polynomial_best_fit(x , y, sigma):
     plt.grid(True)
     plt.show()
 
+    
+def bayesian_infromation_crtierion(x, y, sigma):
+
+    """
+
+    Plots BIC for polynomial fits of different degrees of freedom
+
+    Parameters
+    ----------
+
+    x :     Year from df, array
+    y :     Fertility rate from df, array
+    sigma : Represent uncertaincy of the data points and used to weight them, float
+
+    Calculations
+    ------------
+
+    Calculate chi-squared 
+        - chi² = Σ[(y - y_pred) / sigma]²   
+    Calculate BIC
+        - BIC = k * ln(N) + chi²
+        - k = number of observation OR len(x)
+        - N = number of paramaters  OR degrees + 1
+
+    Returns
+    -------
+
+    matplotlib line graph -> plots degree vs BIC on the same chart. 
+                                Aids in determining best fit for polynomial data
+
+    """
+   
+
+    # ---------------------------------------------------------------------
+    # Lists used in loops
+    #  -> lists used to create graphs 
+    # ---------------------------------------------------------------------
+
+   #for loop to incremeent degrees from 1 to 10 by increments of 0.5
+    degrees = [1, 2, 3, 4 , 5 , 6 , 7, 8, 9, 10 ]
+
+
+    bayesian_list = []
+
+
+    for d in degrees:
+        # Perform linear fit
+        coefficients = np.polyfit(x, y, deg = d )
+
+        # Create polynomial function
+        p = np.poly1d(coefficients)
+        y_pred = p(x)
+        
+        k= len(x)
+        N = d + 1
+
+        chi2 = np.sum(((y - y_pred) / sigma)**2)
+
+        bayesian= chi2 + N* np.log(k)
+
+        bayesian_list.append(bayesian)
+    
+
+    
+
+    plt.plot(degrees, bayesian_list, marker="o")
+    plt.xlabel("Polynomial order (n)")
+    plt.ylabel("BIC")
+    plt.title("Bayesian Information Criterion vs Polynomial Order")
+    plt.grid(True)
+    plt.show()
+
+
+
+
 
 #passed into functions above
 x = spain_fertility_df[x_axis]
@@ -210,12 +303,13 @@ y = spain_fertility_df[y_axis]
 
 
 
-
 if __name__ == "__main__":
 
-    plot_prediction_graph(x, y, degree= 6)
+    # plot_prediction_graph(x, y, degree= 6)
 
-    plot_full_graph(x, y, degree=6)
+    # plot_full_graph(x, y, degree=6)
 
     polynomial_best_fit(x , y, 0.05*y)
+
+    bayesian_infromation_crtierion(x, y, 0.05*y)
 

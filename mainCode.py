@@ -12,6 +12,7 @@ import numpy as np
 #  -> make the code flexible if used dataset changed
 #  -> or to reuse the same function for a different file.
 # ---------------------------------------------------------------------
+print ("FUNCTION BEGAN")
 
 csv_in_use = "children-born-per-woman.csv"
 x_axis = "Year"
@@ -189,7 +190,7 @@ def polynomial_best_fit(x , y, sigma):
 # ---------------------------------------------------------------------
 
       #for loop to incremeent degrees from 1 to 10 by increments of 0.5
-    degrees = [x for x in np.arange(1, 10.5, 0.5)] 
+    degrees = [x for x in np.arange(1, 20)] 
 
     chi2_list = []
 
@@ -260,7 +261,7 @@ def bayesian_infromation_crtierion(x, y, sigma):
     # ---------------------------------------------------------------------
 
    #for loop to incremeent degrees from 1 to 10 by increments of 0.5
-    degrees = [1, 2, 3, 4 , 5 , 6 , 7, 8, 9, 10 ]
+    degrees = [x for x in np.arange(1, 45)] 
 
 
     bayesian_list = []
@@ -294,20 +295,29 @@ def bayesian_infromation_crtierion(x, y, sigma):
     plt.show()
 
 
-
-
-
 #passed into functions above
 x = spain_fertility_df[x_axis]
 y = spain_fertility_df[y_axis]
 
+# standardising x to increase model accuracy and o stop the error:
+#RankWarning: Polyfit may be poorly conditioned coefficients = np.polyfit(x, y, deg = d )
 
+def standardize(x):
+    y = x - x.mean()
+    sd = x.std()
+    return y / sd
+
+x = standardize(x)
+
+
+print("\nCovariance matrix of the said arrays:\n",
+      np.cov(x, y))
 
 if __name__ == "__main__":
 
-    # plot_prediction_graph(x, y, degree= 6)
+    #plot_prediction_graph(x, y, degree= 6)
 
-    # plot_full_graph(x, y, degree=6)
+    plot_full_graph(x, y, degree=6)
 
     polynomial_best_fit(x , y, 0.05*y)
 
